@@ -1,0 +1,74 @@
+name: main deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Build jar
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build -x test
+
+      - name: Upload jar to EC2 & restart
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          command_timeout: 30m
+          script: |
+            set -e
+            mkdir -p /home/ubuntu/deploy
+
+      - name: SCP jar to EC2
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          source: "build/libs/*.jar"
+          target: "/home/ubuntu/deploy"
+          strip_components: 2
+
+      - name: Restart app on EC2
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          command_timeout: 30m
+          script: |
+            set -e
+            cd /home/ubuntu/deploy
+
+            # 최신 jar 선택 (plain 제외)
+            APP_JAR=$(ls -t *.jar | grep -v plain | head -n 1)
+            echo "Deploying: $APP_JAR"
+
+            # 기존 프로세스 종료 (8080)
+            sudo fuser -k 8080/tcp || true
+
+            # 새 jar 실행
+            nohup java -jar "/home/ubuntu/deploy/$APP_JAR" > /home/ubuntu/deploy/app.log 2>&1 &
+
+            # 실행 확인 로그
+            sleep 2
+            tail -n 50 /home/ubuntu/deploy/app.log || true
