@@ -3,12 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="2025년 공휴일 기준 황금연휴 계산기. 연차 몇 개로 최장 휴가를 만들 수 있는지 바로 확인하세요.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="2025 황금연휴 계산기 | 연차로 최장 휴가 찾기">
+    <meta property="og:description" content="2025년 공휴일 기준. 연차 몇 개로 최장 휴가가 되는지 바로 계산!">
+    <meta property="og:url" content="https://goldvacation.r-e.kr/">
+
+    <link rel="canonical" href="https://goldvacation.r-e.kr/">
+
     <meta name="google-site-verification" content="02d7a6fN_zskVu00-FGVR22LoCYiH0oVBNQmEP_4zJA" />
-    <title>황금 연휴 계산기</title>
+    <title>2025 황금연휴 계산기 | 연차 몇 개로 최장 휴가 만들기</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/JQuery-Snowfall/1.7.4/snowfall.jquery.min.js"></script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class'
+        }
+    </script>
+    <script>
+        function enableSnow() {
+            $(document).snowfall("clear");
+            $(document).snowfall({
+                flakeCount: 80,
+                minSize: 1,
+                maxSize: 3,
+                minSpeed: 1,
+                maxSpeed: 3,
+                round: true,
+                shadow: false,
+                flakeIndex: 5
+            });
+        }
+
+        function disableSnow() {
+            $(document).snowfall("clear");
+        }
+
+        $(function () {
+            // ✅ 초기 적용: 다크 모드에서만
+            if (document.documentElement.classList.contains("dark")) {
+                enableSnow();
+            }
+
+            // ✅ 다크 모드 토글 시 반영
+            $("#darkModeToggle").on("click", function () {
+                setTimeout(() => {
+                    if (document.documentElement.classList.contains("dark")) {
+                        enableSnow();
+                    } else {
+                        disableSnow();
+                    }
+                }, 0);
+            });
+        });
+    </script>
+
+
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "2025 황금연휴 계산기",
+            "url": "https://goldvacation.r-e.kr/",
+            "applicationCategory": "CalculatorApplication",
+            "operatingSystem": "All",
+            "description": "2025년 공휴일 기준 황금연휴 계산기. 연차를 며칠 쓰면 최장 휴가가 되는지 추천합니다.",
+            "inLanguage": "ko-KR"
         }
     </script>
     <style>
@@ -149,9 +211,11 @@
 
 <div class="side-banner right">
     <ins class="kakao_ad_area" style="display:none;"
-         data-ad-unit="DAN-5fsi4qBxKbnLhi65"
+         data-ad-unit="DAN-BEMTwY3NrhPmXB69"
          data-ad-width="220"
          data-ad-height="600"></ins>
+
+
 </div>
 <!-- Header -->
 <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
@@ -198,7 +262,7 @@
 
     <div class="hidden md:flex justify-center mb-6">
         <ins class="kakao_ad_area"
-             data-ad-unit="DAN-gEvCPlVQ50HGXaeE"
+             data-ad-unit="DAN-2LjCeyREAijuAbyl"
              data-ad-width="728"
              data-ad-height="90"></ins>
     </div>
@@ -206,7 +270,7 @@
 
     <div class="flex justify-center mb-6 md:hidden">
         <ins class="kakao_ad_area"
-             data-ad-unit="DAN-BeriCJE2q3BOpLsH"
+             data-ad-unit="DAN-LMJsyCujF7vw18IF"
              data-ad-width="320"
              data-ad-height="50"></ins>
     </div>
