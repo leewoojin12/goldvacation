@@ -21,9 +21,15 @@ jobs:
           script: |
             set -e
             cd /home/ubuntu/goldvacation
+          
             git pull origin main
+          
+            chmod +x ./gradlew
             ./gradlew clean build -x test
-            APP_JAR=$(ls -t build/libs/*.jar | head -n 1)
+          
+            APP_JAR=$(ls -t build/libs/*.jar | grep -v plain | head -n 1)
             echo "Running $APP_JAR"
+          
             sudo fuser -k 8080/tcp || true
+          
             nohup java -jar "$APP_JAR" > app.log 2>&1 &
