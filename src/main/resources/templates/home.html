@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="02d7a6fN_zskVu00-FGVR22LoCYiH0oVBNQmEP_4zJA" />
+    <title>황금 연휴 계산기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .dark {
+            color-scheme: dark;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 50;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 0.5rem;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+
+        .dark .modal-content {
+            background: rgb(30, 41, 59);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        .side-banner {
+            position: fixed;
+            top: 100px; /* 헤더 아래로 */
+            width: 220px;
+            z-index: 20;
+        }
+
+        .side-banner.left {
+            left: 20px;
+        }
+
+        .side-banner.right {
+            right: 20px;
+        }
+
+        /* 화면 작을 때 숨김 (모바일/태블릿) */
+        @media (max-width: 1280px) {
+            .side-banner {
+                display: none;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            main {
+                padding-left: 260px;
+                padding-right: 260px;
+            }
+        }
+
+
+
+        .accordion-content.open {
+            max-height: 1000px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgb(34, 197, 94);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateX(400px);
+            transition: transform 0.3s;
+            z-index: 100;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors">
+
+<!-- Left Side Banner -->
+<div class="side-banner left">
+    <script src="https://ads-partners.coupang.com/g.js"></script>
+    <script>
+        new PartnersCoupang.G({
+            id: 953255,
+            template: "carousel",
+            trackingCode: "AF4453224",
+            width: "220",
+            height: "1000"
+        });
+    </script>
+</div>
+
+<!-- Right Side Banner -->
+
+<div class="side-banner right">
+    <ins class="kakao_ad_area" style="display:none;"
+         data-ad-unit="DAN-5fsi4qBxKbnLhi65"
+         data-ad-width="220"
+         data-ad-height="600"></ins>
+</div>
+<!-- Header -->
+<header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white">황금 연휴 계산기</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">최적의 휴가 계획을 세워보세요</p>
+            </div>
+        </div>
+        <div class="flex gap-2">
+            <button id="helpBtn" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+            </button>
+            <button id="darkModeToggle"
+                    class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <svg id="sunIcon" class="w-6 h-6 text-gray-600 dark:text-gray-300 hidden dark:block" fill="none"
+                     stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                <svg id="moonIcon" class="w-6 h-6 text-gray-600 dark:text-gray-300 block dark:hidden" fill="none"
+                     stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<main class="max-w-6xl mx-auto px-4 py-8 pb-24 md:pb-8">
+
+    <div class="hidden md:flex justify-center mb-6">
+        <ins class="kakao_ad_area"
+             data-ad-unit="DAN-gEvCPlVQ50HGXaeE"
+             data-ad-width="728"
+             data-ad-height="90"></ins>
+    </div>
+
+
+    <div class="flex justify-center mb-6 md:hidden">
+        <ins class="kakao_ad_area"
+             data-ad-unit="DAN-BeriCJE2q3BOpLsH"
+             data-ad-width="320"
+             data-ad-height="50"></ins>
+    </div>
+
+
+    <!-- Input Card -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">연차 정보 입력</h2>
+
+        <!-- Annual Leave Stepper -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">보유 연차 개수</label>
+            <div class="flex items-center gap-4">
+                <button id="decreaseBtn"
+                        class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors">
+                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                    </svg>
+                </button>
+                <input
+                        id="annualLeaveInput"
+                        type="number"
+                        value="1"
+                        min="1"
+                        max="50"
+                        class="w-20 text-center text-2xl font-bold ..."
+                />
+                <button id="increaseBtn"
+                        class="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center transition-colors">
+                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor"
+                         viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Period Selection -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">기간 선택</label>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
+                <button class="period-btn px-4 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300"
+                        data-months="3">3개월
+                </button>
+                <button class="period-btn px-4 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300"
+                        data-months="6">6개월
+                </button>
+                <button class="period-btn px-4 py-2 rounded-lg border-2 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/30 transition-colors text-sm font-medium text-blue-600 dark:text-blue-400"
+                        data-months="12">1년
+                </button>
+                <button class="period-btn px-4 py-2 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300"
+                        data-months="custom">직접 선택
+                </button>
+            </div>
+
+            <!-- Custom Date Inputs -->
+            <div id="customDateInputs" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
+                <div>
+                    <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">시작일</label>
+                    <input id="startDate" type="date"
+                           class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-600 dark:text-gray-400 mb-1">종료일</label>
+                    <input id="endDate" type="date"
+                           class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                </div>
+            </div>
+        </div>
+
+        <!-- Options -->
+        <div class="flex flex-wrap gap-4 mb-6">
+
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input id="includeWeekends" type="checkbox" checked
+                       class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"/>
+                <span class="text-sm text-gray-700 dark:text-gray-300">주말 포함</span>
+            </label>
+        </div>
+
+        <!-- Calculate Button -->
+        <button id="calculateBtn"
+                class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">
+            황금 연휴 찾기
+        </button>
+    </div>
+
+    <!-- Results Section -->
+    <div id="resultsSection" class="hidden">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Top 5 황금 연휴 추천</h2>
+        <div id="resultsContainer" class="space-y-4">
+            <!-- Results will be inserted here -->
+        </div>
+    </div>
+    <footer class="mt-12 text-center text-xs text-gray-500 dark:text-gray-400">
+        이 포스팅은 쿠팡 파트너스 활동의 일환으로,
+        이에 따른 일정액의 수수료를 제공받습니다.
+    </footer>
+
+</main>
+
+<!-- Help Modal -->
+<div id="helpModal" class="modal">
+    <div class="modal-content w-full max-w-2xl p-6 m-4">
+        <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">사용 방법</h3>
+            <button id="closeModalBtn"
+                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="space-y-4 text-gray-700 dark:text-gray-300">
+            <div>
+                <h4 class="font-semibold mb-2">1. 연차 개수 입력</h4>
+                <p class="text-sm">보유하고 있는 연차 개수를 입력하세요. +/- 버튼으로 조정할 수 있습니다.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2">2. 기간 선택</h4>
+                <p class="text-sm">황금 연휴를 찾을 기간을 선택하세요. 3개월, 6개월, 1년 중 선택하거나 직접 날짜를 지정할 수 있습니다.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2">3. 옵션 설정</h4>
+                <p class="text-sm">공휴일과 주말 포함 여부를 선택하세요.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2">4. 결과 확인</h4>
+                <p class="text-sm">Top 5 황금 연휴 추천을 확인하고, 각 항목을 클릭하면 상세 정보를 볼 수 있습니다. 복사 버튼으로 정보를 클립보드에 복사할 수 있습니다.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2">💡 팁</h4>
+                <p class="text-sm">URL을 공유하면 설정한 값이 그대로 전달됩니다!</p>
+            </div>
+            <div>
+                <h4 class="font-semibold mb-2">🛠️ 오류 제보 & 의견</h4>
+                <p class="text-sm">
+                    계산 결과가 이상하거나 불편한 점이 있다면<br>
+                    <a href="mailto:zxsa999o@gmail.com" class="text-blue-500 hover:underline">
+                        zxsa999o@gmail.com
+                    </a>
+                    으로 알려주세요!
+                </p>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast">복사되었습니다!</div>
+
+<!-- Mobile Bottom Bar -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 p-4 z-30">
+    <button id="mobileCalculateBtn"
+            class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">
+        황금 연휴 찾기
+    </button>
+</div>
+
+
+<script async src="//t1.daumcdn.net/kas/static/ba.min.js"></script>
+
+<script src="/js/holidays.js" defer></script>
+<script src="/js/app.js" defer></script>
+</body>
+</html>
